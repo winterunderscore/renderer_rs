@@ -8,9 +8,10 @@ use speedy2d::window::{WindowHandler, WindowHelper};
 use speedy2d::dimen::{Vector2, Vec2};
 
 const WINDOW_SIZE: (u32,u32) = (512,480);
+//const WINDOW_SIZE: (u32,u32) = (256,240);
 const DRAW_TRIANGLE: bool = true;
 const DRAW_WIREFRAME: bool = false;
-const OBJ_PATH: &str = "src/objects/videoship.obj";
+const OBJ_PATH: &str = "src/objects/teapot.obj";
 
 #[derive(Debug, Default, Clone, Copy)]
 struct Vec3 {
@@ -282,7 +283,8 @@ impl WindowHandler for MyWindowHandler
                 tris_to_raster.push(tri_projected);
             }
 
-            tris_to_raster.sort_unstable_by(|a, b| ((b.p[0].z + b.p[1].z + b.p[2].z) / 3.0).partial_cmp(&((a.p[0].z + a.p[1].z + a.p[2].z) / 3.0)).unwrap());
+            //tris_to_raster.sort_unstable_by(|a, b| ((b.p[0].z + b.p[1].z + b.p[2].z) / 3.0).partial_cmp(&((a.p[0].z + a.p[1].z + a.p[2].z) / 3.0)).unwrap());
+            tris_to_raster.sort_unstable_by(|a, b| (b.p[0].z).partial_cmp(&(a.p[0].z)).unwrap());
 
             for tri in &tris_to_raster {
                 draw_triangle(graphics,
