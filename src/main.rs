@@ -14,28 +14,53 @@ const OBJ_PATH: &str = "src/objects/teapot.obj";
 
 #[derive(Debug, Default, Clone, Copy)]
 struct Vec3 {
-    pub x: f64,
-    pub y: f64,
-    pub z: f64,
+    x: f64,
+    y: f64,
+    z: f64,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 struct Triangle {
-    pub p: [Vec3; 3],
+    p: [Vec3; 3],
+    col: Color,
 }
 
 #[derive(Debug, Default)]
 struct Mesh {
-    pub tris: Vec<Triangle>,
+    tris: Vec<Triangle>,
 }
 
 #[derive(Debug, Default)]
 struct Mat4x4 {
-    pub m: [[f64;4];4]
+    m: [[f64;4];4]
+}
+
+// impl Vec3 {
+//     const fn new(x: f64, y: f64, z: f64) {
+//         Vec3 { x, y, z, 0.0 }
+//     }
+// }
+
+impl Triangle {
+    fn new(p: [Vec3; 3]) -> Triangle {
+        Triangle {
+            p: p,
+            .. Default::default()
+        }
+    }
+}
+
+impl Default for Triangle {
+    fn default() -> Triangle {
+        Triangle {
+            p: [Default::default(); 3],
+            col: Color::WHITE,
+        }
+    }
 }
 
 impl Mesh {
-    pub fn load_from_obj_file(file_path: &str) -> Option<Mesh> {
+    fn load_from_obj_file(file_path: &str) -> Option<Mesh> {
         let file = File::open(file_path).ok()?;
         let reader = BufReader::new(file);
 
@@ -72,13 +97,11 @@ impl Mesh {
                 let v2 = split.next()?.parse::<usize>().unwrap();
                 let v3 = split.next()?.parse::<usize>().unwrap();
 
-                tris.push(Triangle {
-                    p: [
-                        verts[v1 - 1],
-                        verts[v2 - 1],
-                        verts[v3 - 1],
-                    ]
-                });
+                tris.push(Triangle::new([
+                    verts[v1 - 1],
+                    verts[v2 - 1],
+                    verts[v3 - 1],
+                ]));
             }
         }
 
@@ -123,34 +146,6 @@ fn draw_triangle(graphics: &mut Graphics2D, v1: Vec3, v2: Vec3, v3: Vec3, color:
 
 fn main() {
     let window = Window::new_centered("Title", WINDOW_SIZE).unwrap();
-
-    //let mesh_cube = Mesh { tris: vec![
-    //    // Triangle { p: [ Vec3 { x: X.0, y: X.0, z: X.0 }, Vec3 { x: X.0, y: X.0, z: X.0 }, Vec3 { x: X.0, y: X.0, z: X.0 } ] }
-    //    // SOUTH
-    //    Triangle { p: [ Vec3 { x: 0.0, y: 0.0, z: 0.0 }, Vec3 { x: 0.0, y: 1.0, z: 0.0 }, Vec3 { x: 1.0, y: 1.0, z: 0.0 } ] },
-    //    Triangle { p: [ Vec3 { x: 0.0, y: 0.0, z: 0.0 }, Vec3 { x: 1.0, y: 1.0, z: 0.0 }, Vec3 { x: 1.0, y: 0.0, z: 0.0 } ] },
-    //    
-    //    // EAST
-    //    Triangle { p: [ Vec3 { x: 1.0, y: 0.0, z: 0.0 }, Vec3 { x: 1.0, y: 1.0, z: 0.0 }, Vec3 { x: 1.0, y: 1.0, z: 1.0 } ] },
-    //    Triangle { p: [ Vec3 { x: 1.0, y: 0.0, z: 0.0 }, Vec3 { x: 1.0, y: 1.0, z: 1.0 }, Vec3 { x: 1.0, y: 0.0, z: 1.0 } ] },
-
-    //    // NORTH
-    //    Triangle { p: [ Vec3 { x: 1.0, y: 0.0, z: 1.0 }, Vec3 { x: 1.0, y: 1.0, z: 1.0 }, Vec3 { x: 0.0, y: 1.0, z: 1.0 } ] },
-    //    Triangle { p: [ Vec3 { x: 1.0, y: 0.0, z: 1.0 }, Vec3 { x: 0.0, y: 1.0, z: 1.0 }, Vec3 { x: 0.0, y: 0.0, z: 1.0 } ] },
-
-    //    // WEST
-    //    Triangle { p: [ Vec3 { x: 0.0, y: 0.0, z: 1.0 }, Vec3 { x: 0.0, y: 1.0, z: 1.0 }, Vec3 { x: 0.0, y: 1.0, z: 0.0 } ] },
-    //    Triangle { p: [ Vec3 { x: 0.0, y: 0.0, z: 1.0 }, Vec3 { x: 0.0, y: 1.0, z: 0.0 }, Vec3 { x: 0.0, y: 0.0, z: 0.0 } ] },
-
-    //    // TOP
-    //    Triangle { p: [ Vec3 { x: 0.0, y: 1.0, z: 0.0 }, Vec3 { x: 0.0, y: 1.0, z: 1.0 }, Vec3 { x: 1.0, y: 1.0, z: 1.0 } ] },
-    //    Triangle { p: [ Vec3 { x: 0.0, y: 1.0, z: 0.0 }, Vec3 { x: 1.0, y: 1.0, z: 1.0 }, Vec3 { x: 1.0, y: 1.0, z: 0.0 } ] },
-
-    //    // BOTTOM
-    //    Triangle { p: [ Vec3 { x: 1.0, y: 0.0, z: 1.0 }, Vec3 { x: 0.0, y: 0.0, z: 1.0 }, Vec3 { x: 0.0, y: 0.0, z: 0.0 } ] },
-    //    Triangle { p: [ Vec3 { x: 1.0, y: 0.0, z: 1.0 }, Vec3 { x: 0.0, y: 0.0, z: 0.0 }, Vec3 { x: 1.0, y: 0.0, z: 0.0 } ] },
-    //]};
-
     let mesh = Mesh::load_from_obj_file(OBJ_PATH).expect("failed to open obj");
 
     // Projection Matrix
@@ -211,6 +206,7 @@ impl WindowHandler for MyWindowHandler
         mat_rot_x.m[2][2] = (theta * 0.5).cos();
         mat_rot_x.m[3][3] = 1.0;
 
+        let mut tris_to_raster: Vec<Triangle> = vec![];
         for tri in &self.mesh.tris {
             let mut tri_rotated_z: Triangle = Default::default();
             let mut tri_rotated_zx: Triangle = Default::default();
@@ -254,19 +250,19 @@ impl WindowHandler for MyWindowHandler
                normal.y * (tri_translated.p[0].y - self.camera.y) +
                normal.z * (tri_translated.p[0].z - self.camera.z) < 0.0
             {
-
                 // Lighting
                 let mut light_direction: Vec3 = Vec3 { x: 0.0, y: 0.0, z: -1.0 };
                 let l: f64 = (light_direction.x.powi(2) + light_direction.y.powi(2) + light_direction.z.powi(2)).sqrt();
                 light_direction.x /= l; light_direction.y /= l; light_direction.z /= l;
 
                 let dp: f64 = normal.x * light_direction.x + normal.y * light_direction.y + normal.z * light_direction.z; 
-                let color: Color = Color::from_gray(dp as f32);
+                tri_translated.col = Color::from_gray(dp as f32);
 
                 // Projection
                 multiply_matrix_vector(tri_translated.p[0], &mut tri_projected.p[0], &self.mat_proj);
                 multiply_matrix_vector(tri_translated.p[1], &mut tri_projected.p[1], &self.mat_proj);
                 multiply_matrix_vector(tri_translated.p[2], &mut tri_projected.p[2], &self.mat_proj);
+                tri_projected.col = tri_translated.col;
 
                 // Scale to view
                 
@@ -283,11 +279,17 @@ impl WindowHandler for MyWindowHandler
                 tri_projected.p[1].y *= 0.5 * (screen_size.y as f64);
                 tri_projected.p[2].y *= 0.5 * (screen_size.y as f64);
 
+                tris_to_raster.push(tri_projected);
+            }
+
+            tris_to_raster.sort_unstable_by(|a, b| ((b.p[0].z + b.p[1].z + b.p[2].z) / 3.0).partial_cmp(&((a.p[0].z + a.p[1].z + a.p[2].z) / 3.0)).unwrap());
+
+            for tri in &tris_to_raster {
                 draw_triangle(graphics,
-                    tri_projected.p[0],
-                    tri_projected.p[1],
-                    tri_projected.p[2],
-                    color);
+                    tri.p[0],
+                    tri.p[1],
+                    tri.p[2],
+                    tri.col);
             }
         }
 
