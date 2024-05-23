@@ -10,13 +10,13 @@ use speedy2d::dimen::{Vector2, Vec2};
 const WINDOW_SIZE: (u32,u32) = (512,480);
 const DRAW_TRIANGLE: bool = true;
 const DRAW_WIREFRAME: bool = false;
-const OBJ_PATH: &str = "src/objects/teapot.obj";
+const OBJ_PATH: &str = "src/objects/videoship.obj";
 
 #[derive(Debug, Default, Clone, Copy)]
 struct Vec3 {
-    x: f64,
-    y: f64,
-    z: f64,
+    x: f32,
+    y: f32,
+    z: f32,
 }
 
 #[derive(Debug, Clone)]
@@ -32,11 +32,11 @@ struct Mesh {
 
 #[derive(Debug, Default)]
 struct Mat4x4 {
-    m: [[f64;4];4]
+    m: [[f32;4];4]
 }
 
 // impl Vec3 {
-//     const fn new(x: f64, y: f64, z: f64) {
+//     const fn new(x: f32, y: f32, z: f32) {
 //         Vec3 { x, y, z, 0.0 }
 //     }
 // }
@@ -82,9 +82,9 @@ impl Mesh {
 
 
                 split.next();
-                vector.x = split.next()?.parse::<f64>().unwrap();
-                vector.y = split.next()?.parse::<f64>().unwrap();
-                vector.z = split.next()?.parse::<f64>().unwrap();
+                vector.x = split.next()?.parse::<f32>().unwrap();
+                vector.y = split.next()?.parse::<f32>().unwrap();
+                vector.z = split.next()?.parse::<f32>().unwrap();
 
                 verts.push(vector);
             }
@@ -116,7 +116,7 @@ fn multiply_matrix_vector(i: Vec3, o: &mut Vec3, m: &Mat4x4) {
     o.y = i.x * m.m[0][1] + i.y * m.m[1][1] + i.z * m.m[2][1] + m.m[3][1];
     o.z = i.x * m.m[0][2] + i.y * m.m[1][2] + i.z * m.m[2][2] + m.m[3][2];
     
-    let w: f64 = i.x * m.m[0][3] + i.y * m.m[1][3] + i.z * m.m[2][3] + m.m[3][3];
+    let w: f32 = i.x * m.m[0][3] + i.y * m.m[1][3] + i.z * m.m[2][3] + m.m[3][3];
     if w != 0.0 {
         o.x /= w;
         o.y /= w;
@@ -150,11 +150,11 @@ fn main() {
 
     // Projection Matrix
     
-    let near: f64 = 0.1;
-    let far: f64 = 10000.0;
-    let fov: f64 = 90.0;
-    let aspect_ratio: f64 = (WINDOW_SIZE.0 / WINDOW_SIZE.1).into();
-    let fov_rad: f64 = 1.0 / (fov * 0.5 / 180.0 * 3.14159).tan();
+    let near: f32 = 0.1;
+    let far: f32 = 10000.0;
+    let fov: f32 = 90.0;
+    let aspect_ratio: f32 = (WINDOW_SIZE.0 / WINDOW_SIZE.1) as f32;
+    let fov_rad: f32 = 1.0 / (fov * 0.5 / 180.0 * 3.14159).tan();
     
     let mut mat_proj: Mat4x4 = Default::default();
 
@@ -186,7 +186,7 @@ impl WindowHandler for MyWindowHandler
     {
         graphics.clear_screen(Color::BLACK);
 
-        let elapsed_time = self.start_time.elapsed().as_secs_f64();
+        let elapsed_time = self.start_time.elapsed().as_secs_f32();
 
         let mut mat_rot_z: Mat4x4 = Default::default();
         let mut mat_rot_x: Mat4x4 = Default::default();
@@ -243,7 +243,7 @@ impl WindowHandler for MyWindowHandler
             normal.y = line1.z * line2.x - line1.x * line2.z;
             normal.z = line1.x * line2.y - line1.y * line2.x;
 
-            let l: f64 = (normal.x.powi(2) + normal.y.powi(2) + normal.z.powi(2)).sqrt();
+            let l: f32 = (normal.x.powi(2) + normal.y.powi(2) + normal.z.powi(2)).sqrt();
             normal.x /= l; normal.y /= l; normal.z /= l;
 
             if normal.x * (tri_translated.p[0].x - self.camera.x) +
@@ -252,10 +252,10 @@ impl WindowHandler for MyWindowHandler
             {
                 // Lighting
                 let mut light_direction: Vec3 = Vec3 { x: 0.0, y: 0.0, z: -1.0 };
-                let l: f64 = (light_direction.x.powi(2) + light_direction.y.powi(2) + light_direction.z.powi(2)).sqrt();
+                let l: f32 = (light_direction.x.powi(2) + light_direction.y.powi(2) + light_direction.z.powi(2)).sqrt();
                 light_direction.x /= l; light_direction.y /= l; light_direction.z /= l;
 
-                let dp: f64 = normal.x * light_direction.x + normal.y * light_direction.y + normal.z * light_direction.z; 
+                let dp: f32 = normal.x * light_direction.x + normal.y * light_direction.y + normal.z * light_direction.z; 
                 tri_translated.col = Color::from_gray(dp as f32);
 
                 // Projection
@@ -271,13 +271,13 @@ impl WindowHandler for MyWindowHandler
                 tri_projected.p[1].x += 1.0; tri_projected.p[1].y += 1.0;
                 tri_projected.p[2].x += 1.0; tri_projected.p[2].y += 1.0;
                 
-                tri_projected.p[0].x *= 0.5 * (screen_size.x as f64);
-                tri_projected.p[1].x *= 0.5 * (screen_size.x as f64);
-                tri_projected.p[2].x *= 0.5 * (screen_size.x as f64);
+                tri_projected.p[0].x *= 0.5 * (screen_size.x as f32);
+                tri_projected.p[1].x *= 0.5 * (screen_size.x as f32);
+                tri_projected.p[2].x *= 0.5 * (screen_size.x as f32);
 
-                tri_projected.p[0].y *= 0.5 * (screen_size.y as f64);
-                tri_projected.p[1].y *= 0.5 * (screen_size.y as f64);
-                tri_projected.p[2].y *= 0.5 * (screen_size.y as f64);
+                tri_projected.p[0].y *= 0.5 * (screen_size.y as f32);
+                tri_projected.p[1].y *= 0.5 * (screen_size.y as f32);
+                tri_projected.p[2].y *= 0.5 * (screen_size.y as f32);
 
                 tris_to_raster.push(tri_projected);
             }
