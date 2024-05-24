@@ -9,8 +9,9 @@ use speedy2d::dimen::{Vector2, Vec2};
 
 const WINDOW_SIZE: (u32,u32) = (512,480);
 //const WINDOW_SIZE: (u32,u32) = (256,240);
-const DRAW_TRIANGLE: bool = true;
-const DRAW_WIREFRAME: bool = false;
+const DRAW_TRIANGLE: bool = false;
+const DRAW_WIREFRAME: bool = true;
+const PAINTERS_ALGO: bool = false;
 const OBJ_PATH: &str = "src/objects/teapot.obj";
 
 #[derive(Debug, Default, Clone, Copy)]
@@ -139,9 +140,9 @@ fn draw_triangle(graphics: &mut Graphics2D, v1: Vec3, v2: Vec3, v3: Vec3, color:
         graphics.draw_line(p2, p3, 1.0, Color::GREEN);
         graphics.draw_line(p3, p1, 1.0, Color::BLUE);
 
-        graphics.draw_circle(p1, 3.0, color);
-        graphics.draw_circle(p2, 3.0, color);
-        graphics.draw_circle(p3, 3.0, color);
+        graphics.draw_circle(p1, 2.0, color);
+        graphics.draw_circle(p2, 2.0, color);
+        graphics.draw_circle(p3, 2.0, color);
     }
 }
 
@@ -280,11 +281,18 @@ impl WindowHandler for MyWindowHandler
                 tri_projected.p[1].y *= 0.5 * (screen_size.y as f32);
                 tri_projected.p[2].y *= 0.5 * (screen_size.y as f32);
 
-                tris_to_raster.push(tri_projected);
+                if PAINTERS_ALGO {
+                    tris_to_raster.push(tri_projected);
+                } else {
+                    draw_triangle(graphics,
+                        tri_projected.p[0],
+                        tri_projected.p[1],
+                        tri_projected.p[2],
+                        tri_projected.col);
+                }
             }
 
-            //tris_to_raster.sort_unstable_by(|a, b| ((b.p[0].z + b.p[1].z + b.p[2].z) / 3.0).partial_cmp(&((a.p[0].z + a.p[1].z + a.p[2].z) / 3.0)).unwrap());
-            tris_to_raster.sort_unstable_by(|a, b| (b.p[0].z).partial_cmp(&(a.p[0].z)).unwrap());
+            tris_to_raster.sort_unstable_by(|a, b| ((b.p[0].z + b.p[1].z + b.p[2].z) / 3.0).partial_cmp(&((a.p[0].z + a.p[1].z + a.p[2].z) / 3.0)).unwrap());
 
             for tri in &tris_to_raster {
                 draw_triangle(graphics,
